@@ -91,7 +91,7 @@ DATABASES = {
         'NAME': 'wantu-pedia',
         'USER': 'wantu',
         'PASSWORD': 'wantu1234!',
-        'HOST': 'artvez.candlzmf9vc7.ap-northeast-2.rds.amazonaws.com',
+        'HOST': 'dev-wantu.candlzmf9vc7.ap-northeast-2.rds.amazonaws.com',
         'PORT': '3306',
     },
 }
