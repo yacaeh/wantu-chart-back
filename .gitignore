@@ -131,3 +131,6 @@ dmypy.json
 # jetbrain
 .idea/
 wantu-pedia
+wantu-chart-db.json
+wantu-chart.json
+wantu-chart.sql
