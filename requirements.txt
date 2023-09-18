@@ -29,3 +29,4 @@ gunicorn==20.1.0
 sqlparse==0.4.1
 uvicorn==0.15.0
 Werkzeug==2.0.1
+django-bulk-update-or-create
