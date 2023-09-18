@@ -17,7 +17,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: web
-    command: gunicorn project.asgi:application -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+    command: gunicorn atchapedia.asgi:application -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
     volumes:
       - ./static:/usr/src/app/static
     expose:
