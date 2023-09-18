@@ -78,21 +78,27 @@ WSGI_APPLICATION = 'atchapedia.wsgi.application'
 
 
 DATABASES = {
+    # 'dev': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': 'wantu-pedia',
+    #     'USER': 'wantu',
+    #     'PASSWORD': 'wantu1234!',
+    #     'HOST': 'localhost',
+    #     'PORT': '3306',
+    # },
     'dev': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'wantu-pedia',
-        'USER': 'wantu',
-        'PASSWORD': 'wantu1234!',
-        'HOST': 'localhost',
-        'PORT': '3306',
-    },
-    'production': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'wantu-pedia',
+        'NAME': 'wantu-chart',
         'USER': 'wantu',
         'PASSWORD': 'wantu1234!',
-        'HOST': 'dev-wantu.candlzmf9vc7.ap-northeast-2.rds.amazonaws.com',
+        'HOST': 'wantu.candlzmf9vc7.ap-northeast-2.rds.amazonaws.com',
         'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            'charset': 'utf8mb4', # 테이블 생성 자동으로 해줄때 쓸 인코딩,, 이거안하면 밑에꺼해도 효과 엑스
+            'use_unicode': True,
+        },
+
     },
 }
 

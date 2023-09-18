@@ -2,7 +2,7 @@ import requests
 from django.conf import settings
 from time import sleep
 import json
-
+import re
 
 headers = {
     "Content-Type": "application/json",

@@ -11,9 +11,9 @@ class Channel(models.Model):
     description = models.TextField(default="등록된 소개글이 없습니다.")
     published_at = models.DateTimeField(null=True)
     thumbnail = models.URLField(max_length=500)
-    subscriber_count = models.IntegerField(blank=True, null=True, default=0)
-    view_count = models.IntegerField(blank=True, null=True, default=0)
-    video_count = models.IntegerField(blank=True, null=True, default=0)
+    subscriber_count = models.BigIntegerField(blank=True, null=True, default=0)
+    view_count = models.BigIntegerField(blank=True, null=True, default=0)
+    video_count = models.BigIntegerField(blank=True, null=True, default=0)
     updated_at = models.DateTimeField(auto_now=True,blank=True, null=True)
 
     class Meta:
@@ -29,9 +29,9 @@ class Movie(models.Model):
     description    = models.TextField(default="등록된 소개글이 없습니다.")
     running_time   = models.IntegerField( blank=True, null=True, default=0)
     average_rating = models.DecimalField(max_digits=2, decimal_places=1, blank=True, null=True, default=0.0)
-    total_views = models.IntegerField(null=True, default=0)
-    total_likes = models.IntegerField(null=True, default=0)
-    total_comments = models.IntegerField(null=True, default=0)
+    total_views = models.BigIntegerField(null=True, default=0)
+    total_likes = models.BigIntegerField(null=True, default=0)
+    total_comments = models.BigIntegerField(null=True, default=0)
     grade          = models.ForeignKey("Grade", null=True, on_delete=models.SET_NULL, blank=True)
     poster_image   = models.URLField(max_length=500, blank=True, null=True)
     trailer        = models.CharField(max_length=500, null=True)
@@ -117,13 +117,13 @@ class MovieGenre(models.Model):
 
 
 class Episode(models.Model):
-    name = models.CharField(max_length=45)
+    name = models.CharField(max_length=500)
     description = models.TextField(default="등록된 소개글이 없습니다.")
     release_date = models.DateField()
     link = models.CharField(max_length=500)
-    viewCount = models.IntegerField(blank=True, null=True, default=0)
-    likeCount = models.IntegerField(blank=True, null=True, default=0)
-    commentCount = models.IntegerField(blank=True, null=True, default=0)
+    viewCount = models.BigIntegerField(blank=True, null=True, default=0)
+    likeCount = models.BigIntegerField(blank=True, null=True, default=0)
+    commentCount = models.BigIntegerField(blank=True, null=True, default=0)
     duration = models.CharField(max_length=500, null=True, blank=True)
     highlights = models.JSONField(blank=True, null=True)
     topComments = models.JSONField(blank=True, null=True)
