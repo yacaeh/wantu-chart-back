@@ -12,4 +12,3 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 # Project를 /usr/src/app으로 복사
 COPY . .
-RUN echo yes | python manage.py collectstatic
