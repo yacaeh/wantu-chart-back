@@ -34,4 +34,4 @@ services:
       - '8000'
     restart: always
     environment:
-      DEBUG: 'false'
+      - DEBUG=False
