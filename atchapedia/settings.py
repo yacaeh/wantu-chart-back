@@ -75,10 +75,10 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'atchapedia.wsgi.application'
-redis_address = 'localhost'
+redis_address = 'redis'
 
-if DEBUG is False :
-    redis_address = 'redis'
+if DEBUG is True :
+    redis_address = 'localhost'
 
 print(redis_address)
 CACHES = {
