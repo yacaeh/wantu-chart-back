@@ -32,5 +32,6 @@ services:
       - ./static:/usr/src/app/static
     expose:
       - '8000'
+    restart: always
     environment:
-      - DEBUG=False
+      DEBUG: False
