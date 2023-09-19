@@ -103,10 +103,10 @@ DATABASES = {
     # },
     'dev': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'wantu-chart',
-        'USER': 'wantu',
-        'PASSWORD': 'wantu1234!',
-        'HOST': 'wantu.candlzmf9vc7.ap-northeast-2.rds.amazonaws.com',
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_USER'),
+        'PASSWORD': env('DB_PASSWORD'),
+        'HOST': env('DB_HOST'),
         'PORT': '3306',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
@@ -205,6 +205,6 @@ CORS_ALLOW_HEADERS = (
     'x-requested-with',
 		#만약 허용해야할 추가적인 헤더키가 있다면?(사용자정의 키) 여기에 추가하면 됩니다.
 )
-YOUTUBE_API_KEY="AIzaSyDlo1ez9E0Zh81kij8v4Ipx0NWVRrocx0w"
+YOUTUBE_API_KEY=env('YOUTUBE_API_KEY')
 YOUTUBE_API_URL="https://www.googleapis.com/youtube/v3"
-LOCAL_YOUTUBE_API_URL="http://localhost:8080"
+LOCAL_YOUTUBE_API_URL=env('LOCAL_YOUTUBE_API_URL')
