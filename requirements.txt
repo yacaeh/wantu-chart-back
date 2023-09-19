@@ -37,3 +37,4 @@ requests==2.28.1
 django-redis==5.3.0
 django-debug-toolbar
 django-clearcache==1.2.1
+django-environ
