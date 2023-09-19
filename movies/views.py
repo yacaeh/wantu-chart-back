@@ -46,7 +46,7 @@ def bulk_create_manytomany_relations(
     getattr(model_from, field_name).through.objects.bulk_create(through_objs)
 
 class ChannelView(View):
-    @method_decorator(cache_page(60*15))
+    @method_decorator(cache_page(60*60))
     def get(self, request):
         OFFSET = 0
         LIMIT  = 16
@@ -69,7 +69,7 @@ class ChannelView(View):
         # return HttpResponse('<html><body> channel ... cached</body></html>')
 
 class ChannelDetailView(View):
-    @method_decorator(cache_page(60*15))
+    @method_decorator(cache_page(60*60))
     def get(self, request, channel_id):
         try:
             if not Channel.objects.filter(id=channel_id).exists():
@@ -108,7 +108,7 @@ class ChannelDetailView(View):
 
 
 class MovieView(View): 
-    @method_decorator(cache_page(60*15))
+    @method_decorator(cache_page(60*60))
     def get(self,request): 
         search = request.GET.get('search', '')
         country_name  = request.GET.get("country")
@@ -208,7 +208,7 @@ class RateView(View):
 
 class GenreMovieView(View):
 
-    @method_decorator(cache_page(60*15))
+    @method_decorator(cache_page(60*60))
     def get(self, request):  
         OFFSET = 0
         LIMIT  = 16
@@ -252,7 +252,7 @@ class GenreMovieView(View):
 
 class MovieDetailView(View):
 
-    @method_decorator(cache_page(60*15))
+    @method_decorator(cache_page(60*60))
     def get(self, request, movie_id):
         try:
             if not Movie.objects.filter(id=movie_id).exists():
@@ -486,7 +486,7 @@ def movie_upload_from_csv(request):
                         highlight = get_highlights([episodeId])[0]['mostReplayed']
                         episodeHighlights = {"start": highlight['heatMarkersDecorations'][0]['timedMarkerDecorationRenderer']['visibleTimeRangeStartMillis'], "end":highlight['heatMarkersDecorations'][0]['timedMarkerDecorationRenderer']['visibleTimeRangeEndMillis']}
                     except :
-                        episodeHighlights = {"start":0, "end":1000}
+                        episodeHighlights = {"start":0, "end":5000}
 
                     try:
                         new_episode = Episode.objects.get(name=episodeTitle, link=episodeId)
