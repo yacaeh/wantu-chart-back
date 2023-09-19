@@ -7,7 +7,7 @@ pymysql.install_as_MySQLdb()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 from os import path
-
+import os
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -16,7 +16,8 @@ from os import path
 SECRET_KEY = 'django-insecure-f=msjy)w)(b&_iuwx(c(i9%%04n!3!t_a@bnyv=fe(%h=c3pu5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ['DEBUG']
+print(DEBUG)
 
 ALLOWED_HOSTS = ['*']
 
@@ -74,11 +75,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'atchapedia.wsgi.application'
+redis_address = 'localhost'
 
+if DEBUG is False :
+    redis_address = 'redis'
+
+print(redis_address)
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://localhost:6379/0',
+        'LOCATION': f'redis://{redis_address}:6379/0',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
