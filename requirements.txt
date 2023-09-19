@@ -34,3 +34,6 @@ uvicorn==0.15.0
 Werkzeug==2.0.1
 django-bulk-update-or-create
 requests==2.28.1
+django-redis==5.3.0
+django-debug-toolbar==3.5.2
+django-clearcache==1.2.1

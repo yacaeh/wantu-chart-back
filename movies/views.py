@@ -2,7 +2,7 @@ import json
 from json.decoder import JSONDecodeError
 from decimal import *
 
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views import View
 from django.db.models import Q, Avg
 from django.core.exceptions import ValidationError
@@ -18,6 +18,8 @@ from collections import namedtuple
 from bulk_update_or_create import BulkUpdateOrCreateQuerySet
 import re
 from datetime import datetime, timedelta
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 
 ManyToManySpec = namedtuple(
     "ManyToManySpec", ["from_object", "to_object"]
@@ -44,11 +46,12 @@ def bulk_create_manytomany_relations(
     getattr(model_from, field_name).through.objects.bulk_create(through_objs)
 
 class ChannelView(View):
+    @method_decorator(cache_page(60*15))
     def get(self, request):
         OFFSET = 0
         LIMIT  = 16
 
-        channels = Channel.objects.all().order_by('?').distinct()
+        channels = Channel.objects.all().order_by('-subscriber_count')
         channel_list = [{
             "id": channel.id,
             "channel_id"       : channel.channel_id,
@@ -63,8 +66,10 @@ class ChannelView(View):
         } for channel in channels][OFFSET : LIMIT]
 
         return JsonResponse({"results" : channel_list}, status=200)
+        # return HttpResponse('<html><body> channel ... cached</body></html>')
 
 class ChannelDetailView(View):
+    @method_decorator(cache_page(60*15))
     def get(self, request, channel_id):
         try:
             if not Channel.objects.filter(id=channel_id).exists():
@@ -103,6 +108,7 @@ class ChannelDetailView(View):
 
 
 class MovieView(View): 
+    @method_decorator(cache_page(60*15))
     def get(self,request): 
         search = request.GET.get('search', '')
         country_name  = request.GET.get("country")
@@ -125,7 +131,7 @@ class MovieView(View):
         if genre1 or genre2:
             q.add(Q(genre__name=genre1)|Q(genre__name=genre2), q.AND)
         
-        movies = Movie.objects.filter(q).order_by('?').distinct()
+        movies = Movie.objects.filter(q).order_by('-release_date').distinct()
         
         if search:
             movies = movies.filter(
@@ -201,6 +207,8 @@ class RateView(View):
 
 
 class GenreMovieView(View):
+
+    @method_decorator(cache_page(60*15))
     def get(self, request):  
         OFFSET = 0
         LIMIT  = 16
@@ -243,6 +251,8 @@ class GenreMovieView(View):
 
 
 class MovieDetailView(View):
+
+    @method_decorator(cache_page(60*15))
     def get(self, request, movie_id):
         try:
             if not Movie.objects.filter(id=movie_id).exists():
@@ -315,6 +325,7 @@ class CommentView(View):
         return JsonResponse({"result" :comment_list}, status=200)
 
 class EpisodeMovieView(View):
+    @method_decorator(cache_page(60*15))
     def get(self, request, movie_id):
         episode_ids = MovieEpisode.objects.filter(movie_id=movie_id).values_list('episode_id', flat=True)
         episode_list = Episode.objects.filter(pk__in=episode_ids).exclude(name='Private video')
@@ -535,3 +546,14 @@ def episode_upload_from_csv(request):
         else:
             messages.info(request,"성공적으로 등록되었습니다.")
             return redirect("member_list")
+
+
+
+@cache_page(60 * 15)
+def cached(request):
+    movies = Movie.objects.all()
+    return HttpResponse('<html><body>{0} movies ... cached</body></html>'.format(len(movies)))
+
+def cacheless(request):
+    movies = Movie.objects.all()
+    return HttpResponse('<html><body>{0} movies ... cacheless</body></html>'.format(len(movies)))

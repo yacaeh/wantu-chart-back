@@ -1,5 +1,13 @@
 version: '2'
 services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - '6379:6379'
+    depends_on:
+      - web
+
   nginx:
     image: nginx:latest
     container_name: nginx
@@ -23,4 +31,4 @@ services:
     expose:
       - '8000'
     environment:
-      - PRODUCTION=False
+      - DEBUG=False
