@@ -26,13 +26,16 @@ class Movie(models.Model):
     objects = BulkUpdateOrCreateQuerySet.as_manager()
     title          = models.CharField(max_length=100) 
     release_date   = models.DateField( blank=True, null=True)
-    description    = models.TextField(default="등록된 소개글이 없습니다.")
+    description    = models.TextField(default="", null=True, blank=True)
     running_time   = models.IntegerField( blank=True, null=True, default=0)
     average_rating = models.DecimalField(max_digits=2, decimal_places=1, blank=True, null=True, default=0.0)
-    total_views = models.BigIntegerField(null=True, default=0)
-    total_likes = models.BigIntegerField(null=True, default=0)
-    total_comments = models.BigIntegerField(null=True, default=0)
-    grade          = models.ForeignKey("Grade", null=True, on_delete=models.SET_NULL, blank=True)
+    total_views = models.BigIntegerField(null=True, default=0) # This is the one that daily updated
+    total_likes = models.BigIntegerField(null=True, default=0) # This is the one that daily updated
+    total_comments = models.BigIntegerField(null=True, default=0) # This is the one that daily updated
+    total_videos = models.BigIntegerField(null=True, default=0) # This is the one that daily updated
+    total_dislikes = models.BigIntegerField(null=True, default=0) # This is the one that daily updated
+    is_new = models.BooleanField(default=False, null=True, blank=True)
+    wantu_score = models.BigIntegerField(null=True, default=0) # This is the one that daily updated => Sort by this value as ranking
     poster_image   = models.URLField(max_length=500, blank=True, null=True)
     trailer        = models.CharField(max_length=500, null=True)
     participant    = models.ManyToManyField("Participant", through="MovieParticipant")
@@ -43,6 +46,7 @@ class Movie(models.Model):
     episode       = models.ManyToManyField("Episode", through="MovieEpisode")
     channel       = models.ForeignKey("Channel", on_delete=models.CASCADE, null=True, blank=True)
     playlist    = models.CharField(max_length=500, null=True, blank=True)
+    last_updated = models.DateTimeField(auto_now=True,blank=True, null=True)
 
     class Meta:
         db_table = "movies"
@@ -123,12 +127,14 @@ class Episode(models.Model):
     link = models.CharField(max_length=500)
     viewCount = models.BigIntegerField(blank=True, null=True, default=0)
     likeCount = models.BigIntegerField(blank=True, null=True, default=0)
+    dislikeCount = models.BigIntegerField(blank=True, null=True, default=0)
     commentCount = models.BigIntegerField(blank=True, null=True, default=0)
     duration = models.CharField(max_length=500, null=True, blank=True)
     highlights = models.JSONField(blank=True, null=True)
     topComments = models.JSONField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True,blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True,blank=True, null=True)
+    tags = models.JSONField(blank=True, null=True)
 
     class Meta:
         db_table = "episodes"
@@ -196,4 +202,57 @@ class Point(models.Model):
     class Meta:
         managed = True
         db_table = 'points'
-    
+
+class PlayHistory(models.Model):
+    user    = models.ForeignKey('users.User', null=True, on_delete=models.SET_NULL)
+    movie   = models.ForeignKey("Movie", on_delete=models.CASCADE)
+    episode = models.ForeignKey("Episode", on_delete=models.CASCADE)
+    last_played = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        ordering = ['-last_played']
+        db_table = "play_histories"
+
+# Rank model should contain the following fields (rank, rankFluc, movie Id, movie title, movie poster, wantu_score)
+
+class DailyRank(models.Model):
+    rank = models.JSONField(blank=True, null=True)
+    genre = models.ForeignKey("Genre", on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        managed = True
+        db_table = "daily_ranks"
+
+class WeeklyRank(models.Model):
+    rank = models.JSONField(blank=True, null=True)
+    genre = models.ForeignKey("Genre", on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        managed = True
+        db_table = "weekly_ranks"
+
+class MonthlyRank(models.Model):
+    rank = models.JSONField(blank=True, null=True)
+    genre = models.ForeignKey("Genre", on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        managed = True
+        db_table = "monthly_ranks"
+
+class DailyView(models.Model):
+    episode = models.ForeignKey("Episode", on_delete=models.CASCADE)
+    views = models.IntegerField()
+    likes = models.IntegerField()
+    comments = models.IntegerField()
+    dislikes = models.IntegerField()
+    date = models.DateField()
+    class Meta:
+        managed = True
+        db_table = "daily_views"
+
+# https://api.playboard.co/v1/chart/channel?locale=ko&countryCode=KR&period=1700265600&size=20&chartTypeId=10&periodTypeId=2&indexDimensionId=10&indexTypeId=3&indexTarget=cooking&indexCountryCode=KR

@@ -2,6 +2,8 @@ from pathlib     import Path
 import environ
 import pymysql
 from os import path
+import sys
+import os
 
 pymysql.install_as_MySQLdb()
 env = environ.Env()
@@ -22,7 +24,7 @@ REDIS_HOST = env('REDIS_HOST')
 print(DEBUG, REDIS_HOST)
 
 ALLOWED_HOSTS = ['*']
-
+EXCLUDED_DIRS=['static']
 
 # Application definition
 
@@ -39,7 +41,22 @@ INSTALLED_APPS = [
     'users',
     'movies',
     'debug_toolbar',
+    'django_apscheduler'
 ]
+
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+
+APSCHEDULER_RUN_NOW_TIMEOUT = 5  # Seconds
+
+SCHEDULER_DEFAULT = True # apps.py 참고
+SCHEDULER_CONFIG = {
+    "apscheduler.jobstores.default": {
+        "class": "django_apscheduler.jobstores:DjangoJobStore"
+    },
+    'apscheduler.executors.processpool': {
+        "type": "threadpool"
+    },
+}
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -53,7 +70,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'atchapedia.urls'
+ROOT_URLCONF = 'app.urls'
 BASE_DIR = path.dirname(path.dirname(path.abspath(__file__)))
 
 TEMPLATES = [
@@ -76,7 +93,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'atchapedia.wsgi.application'
+WSGI_APPLICATION = 'app.wsgi.application'
 
 CACHES = {
     'default': {
@@ -171,6 +188,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+# Additional locations of static files
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -181,7 +202,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 APPEND_SLASH = False
 
 ##CORS
-# CORS_ORIGIN_ALLOW_ALL=True
+CORS_ORIGIN_ALLOW_ALL=True
 # CORS_ALLOW_CREDENTIALS=True
 
 # CORS_ALLOW_METHODS = (
@@ -208,3 +229,9 @@ APPEND_SLASH = False
 YOUTUBE_API_KEY=env('YOUTUBE_API_KEY')
 YOUTUBE_API_URL="https://www.googleapis.com/youtube/v3"
 LOCAL_YOUTUBE_API_URL=env('LOCAL_YOUTUBE_API_URL')
+
+if 'runserver' in sys.argv:
+    for exclude_dir in EXCLUDED_DIRS:
+        exclude_path = os.path.join(BASE_DIR, exclude_dir)
+        if exclude_path in sys.path:
+            sys.path.remove(exclude_path)

@@ -1,6 +1,8 @@
+from typing import Any
 from django.contrib import admin
 from . import models
 from users.models import User
+from app.utils.youtube import get_channel_info, get_video_details, get_highlights, make_video_info_request, make_api_request, get_video_ids, process_playlist, API_KEY_LIST, API_INDEX,add_playlist_videos
 
 @admin.register(models.Channel)
 class ChannelAdmin(admin.ModelAdmin):
@@ -41,8 +43,17 @@ class MovieAdmin(admin.ModelAdmin):
         "poster_image",
         "trailer",
         "channel",
+        "playlist",
         )
     inlines = [MovieGenreInline,MovieCountryInline,MovieEpisodeInline,MovieParticipantInline]
+    def save_model(self, request: Any, obj: Any, form: Any, change: Any) -> None:
+        # Save other episodes...        
+        super().save_model(request, obj, form, change)
+
+        print("SAVE MODEL!!!")
+        # Get channel info
+        add_playlist_videos(obj.playlist)
+
 
 @admin.register(models.Grade)
 class GradeAdmin(admin.ModelAdmin):

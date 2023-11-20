@@ -8,10 +8,10 @@ from django.db.models import Q, Avg
 from django.core.exceptions import ValidationError
 
 from users.utils import login_decorator
-from movies.models import Movie, MovieParticipant, Channel, Rating, MovieGenre, MovieEpisode, Episode, Genre, Country
+from movies.models import Movie, MovieParticipant, Channel, Rating, MovieGenre, MovieEpisode, Episode, Genre, Country, WishList, PlayHistory
 from movies.serializers import EpisodeSerializer
 from django.shortcuts import render
-from atchapedia.utils.youtube import get_channel_info, get_video_details,get_playlist_info, get_comments, get_highlights, comment, convert_PT_to_time
+from app.utils.youtube import get_channel_info, get_video_details,get_playlist_info, get_comments, get_highlights, comment, convert_PT_to_time
 from datetime import datetime
 from typing import Iterable
 from collections import namedtuple
@@ -46,7 +46,7 @@ def bulk_create_manytomany_relations(
     getattr(model_from, field_name).through.objects.bulk_create(through_objs)
 
 class ChannelView(View):
-    @method_decorator(cache_page(60*60))
+    @method_decorator(cache_page(60*60*24))
     def get(self, request):
         OFFSET = 0
         LIMIT  = 16
@@ -69,7 +69,7 @@ class ChannelView(View):
         # return HttpResponse('<html><body> channel ... cached</body></html>')
 
 class ChannelDetailView(View):
-    @method_decorator(cache_page(60*60))
+    @method_decorator(cache_page(60*60*24))
     def get(self, request, channel_id):
         try:
             if not Channel.objects.filter(id=channel_id).exists():
@@ -108,7 +108,7 @@ class ChannelDetailView(View):
 
 
 class MovieView(View): 
-    @method_decorator(cache_page(60*60))
+    @method_decorator(cache_page(60*60*24))
     def get(self,request): 
         search = request.GET.get('search', '')
         country_name  = request.GET.get("country")
@@ -146,11 +146,11 @@ class MovieView(View):
             "country_name"   : [country.name for country in movie.country.all()],
             "movie_name"     : movie.title,
             "movie_id"       : movie.id,
-            "running_time"   : sum([convert_PT_to_time(episode.duration) for episode in movie.episode.all()]),
-            "total_views"     : sum([episode.viewCount for episode in movie.episode.all()]),
-            "total_likes"     : sum([episode.likeCount for episode in movie.episode.all()]),
-            "total_comments"  : sum([episode.commentCount for episode in movie.episode.all()]),
-            "total_episodes"  : movie.episode.count(),
+            # "running_time"   : sum([convert_PT_to_time(episode.duration) for episode in movie.episode.all()]),
+            # "total_views"     : sum([episode.viewCount for episode in movie.episode.all()]),
+            # "total_likes"     : sum([episode.likeCount for episode in movie.episode.all()]),
+            # "total_comments"  : sum([episode.commentCount for episode in movie.episode.all()]),
+            # "total_episodes"  : movie.episode.count(),
             "released_date"  : movie.release_date,
             "average_rating" : movie.average_rating,
             "poster_image"   : movie.poster_image,
@@ -208,7 +208,7 @@ class RateView(View):
 
 class GenreMovieView(View):
 
-    @method_decorator(cache_page(60*60))
+    @method_decorator(cache_page(60*60*24))
     def get(self, request):  
         OFFSET = 0
         LIMIT  = 16
@@ -252,14 +252,14 @@ class GenreMovieView(View):
 
 class MovieDetailView(View):
 
-    @method_decorator(cache_page(60*60))
+    @method_decorator(cache_page(60*60*24))
     def get(self, request, movie_id):
         try:
             if not Movie.objects.filter(id=movie_id).exists():
                 return JsonResponse({'MESSAGE' : 'Movie Not Exists'}, status = 404)
 
             movie = Movie.objects.get(id=movie_id)
-
+            print(movie)
             movie_details = {
                 'movie_id'       : movie_id,
                 'title'          : movie.title,
@@ -269,22 +269,27 @@ class MovieDetailView(View):
                 'poster_image'   : movie.poster_image,
                 'trailer'        : movie.trailer,
                 'image_url'      : [image.image_url for image in movie.image_set.all()],
-                'participants'   : [
-                    {
-                        'name'  : participants.participant.name,
-                        'role'  : participants.role,
-                        'image' : participants.participant.image_url 
-                    } for participants in MovieParticipant.objects.filter(movie=movie_id)
-                ],
+                # 'participants'   : [
+                #     {
+                #         'name'  : participants.participant.name,
+                #         'role'  : participants.role,
+                #         'image' : participants.participant.image_url 
+                #     } for participants in MovieParticipant.objects.filter(movie=movie_id)
+                # ],
                 'description'    : movie.description,
                 'rating_users'   : movie.rating_set.count(),
-                'average_rating' : round(Rating.objects.filter(movie_id=movie).aggregate(Avg('rate'))['rate__avg'], 1) if Rating.objects.filter(movie_id=movie).exists() else 0.0,
+                'average_rating' : movie.average_rating,
+                'is_new'         : movie.is_new,
+                'is_wish'        : WishList.objects.filter(user_id=request.user.id, movie_id=movie_id).exists(),
             }
 
             return JsonResponse({'movie_info' : movie_details}, status = 200)
 
         except KeyError:
-            JsonResponse({'MESSAGE' : 'KEY_ERROR'}, status=400)
+            print("KeyError")
+            print(KeyError)
+            JsonResponse({'MESSAGE' : KeyError}, status=400)
+
 
 
 class CommentView(View):
@@ -325,7 +330,7 @@ class CommentView(View):
         return JsonResponse({"result" :comment_list}, status=200)
 
 class EpisodeMovieView(View):
-    @method_decorator(cache_page(60*15))
+    @method_decorator(cache_page(60*60*24))
     def get(self, request, movie_id):
         episode_ids = MovieEpisode.objects.filter(movie_id=movie_id).values_list('episode_id', flat=True)
         episode_list = Episode.objects.filter(pk__in=episode_ids).exclude(name='Private video')
@@ -335,6 +340,57 @@ class EpisodeMovieView(View):
             "message" : "SUCCESS",
             "episodes" : serialized_episodes.data,
         },status=200)
+
+
+class WishListView(View):
+    @login_decorator
+    def post(self, request, movie_id):
+        try:    
+            data    = json.loads(request.body)
+            user_id = request.user.id
+            wishlist  = WishList.objects.get(user_id=user_id,movie_id=movie_id)
+            isDelete = data['isDelete']
+            
+            if not isDelete:
+                wishlist.save()
+                return JsonResponse({"MESSAGE" : "ADDED TO Wishlist"}, status=200)
+            
+            else:
+                wishlist.delete()
+                return JsonResponse({"MESSAGE" : "REMOVED FROM Wishlist"}, status=200)
+            
+        except WishList.DoesNotExist:
+                WishList.objects.create(user_id=user_id, movie_id=movie_id)
+                print("Added to wishlist")
+                return JsonResponse({"MESSAGE" : "ADDED TO Wishlist"}, status=200)
+
+        except ValueError:
+                return JsonResponse({"MESSAGE" : "VALUE_ERROR"}, status=404)
+        except KeyError:
+                return JsonResponse({"MESSAGE" : "KEY_ERROR"}, status=404)
+
+    @login_decorator
+    def get(self, request, movie_id):
+        try:    
+            print("Wishlist called")
+            user_id = request.user.id
+            wishlist  = WishList.objects.get(user_id=user_id,movie_id=movie_id)
+            if not wishlist:
+                print("no wishlist found...")
+                return JsonResponse({"MESSAGE" : "No Wishlist"}, status=200)
+            
+            else:
+                print("Wishlist exist!")
+                return JsonResponse({"is_wish" : True}, status=200)
+
+        except WishList.DoesNotExist:
+                print("no wishlist found...")
+                return JsonResponse({"is_wish" : False}, status=200)
+
+        except ValueError:
+                return JsonResponse({"MESSAGE" : "VALUE_ERROR"}, status=404)
+        except KeyError:
+                return JsonResponse({"MESSAGE" : "KEY_ERROR"}, status=404)
 
 
 import csv
@@ -546,14 +602,120 @@ def episode_upload_from_csv(request):
         else:
             messages.info(request,"성공적으로 등록되었습니다.")
             return redirect("member_list")
+        
 
 
+class LatestRateView(View):
+    def get(self, request):
+        latest_ratings = Rating.objects.all().order_by('-id')[:10]
+        comment_list = [{
+            "user_name"   : rating.user.name, 
+            "user_image"  : rating.user.image_url,
+            "user_id"     : rating.user.id,
+            "comment"     : rating.comment, 
+            "user_rating" : rating.rate ,
+            "spoiler"     : rating.spoiler,
+            "series"      : rating.movie.title,
+            "trailer"     : rating.movie.trailer,
+            "movie_id"    : rating.movie.id,
+        }for rating in latest_ratings]
 
-@cache_page(60 * 15)
-def cached(request):
-    movies = Movie.objects.all()
-    return HttpResponse('<html><body>{0} movies ... cached</body></html>'.format(len(movies)))
+        return JsonResponse({"result" :comment_list}, status=200)
 
-def cacheless(request):
-    movies = Movie.objects.all()
-    return HttpResponse('<html><body>{0} movies ... cacheless</body></html>'.format(len(movies)))
+# Get list of movies by it's wantu_score
+class RankingView(View):
+    @method_decorator(cache_page(60*60*24))
+    def get(self, request):
+        search = request.GET.get('search', '')
+        country_name  = request.GET.get("country")
+        genre1        = request.GET.get("genre1")
+        genre2        = request.GET.get("genre2")
+        rating        = request.GET.get("rating","")
+        KOREAN_MOVIE  = "한국"
+        FOREIGN_MOVIE = "외국"
+        LIMIT         = 25
+        OFFSET        = 0
+
+        q = Q()
+        
+        if country_name == KOREAN_MOVIE:
+            q.add(Q(country__name=KOREAN_MOVIE), q.AND)
+
+        if country_name == FOREIGN_MOVIE:
+            q.add(~Q(country__name=KOREAN_MOVIE), q.AND)
+
+        if genre1 or genre2:
+            q.add(Q(genre__name=genre1)|Q(genre__name=genre2), q.AND)
+
+        movies = Movie.objects.filter(q).order_by('-wantu_score').distinct()
+        movie_list = [{
+            "country_name"   : [country.name for country in movie.country.all()],
+            "movie_name"     : movie.title,
+            "movie_id"       : movie.id,
+            "total_views"     : movie.total_views,
+            "total_likes"     : movie.total_likes,
+            "total_comments"  : movie.total_comments,
+            "total_episodes"  : movie.total_videos,
+            "total_videos" : movie.total_videos,
+            "wantu_score" : movie.wantu_score,
+            "is_new" : movie.is_new,
+            "released_date"  : movie.release_date,
+            "average_rating" : movie.average_rating,
+            "poster_image"   : movie.poster_image,
+            "trailer"        : movie.trailer,
+            "genres"         : [genre.name for genre in movie.genre.all()],
+        } for movie in movies][OFFSET : LIMIT]
+
+        return JsonResponse({"results" : movie_list}, status=200)
+    
+class PlayHistoryView(View):
+    @login_decorator
+    def post(self, request,movie_id):
+        try:
+            user_id = request.user.id
+            print("user_id",user_id)
+            # get data from request
+            data = json.loads(request.body)
+            print(data)
+            episodeLink = data['episode']
+            episode = Episode.objects.get(link=episodeLink)
+            play_history = PlayHistory.objects.get(user_id=user_id, movie_id=movie_id)
+            play_history.episode=episode
+            play_history.last_played=datetime.now()
+            play_history.save()
+            print("HISTORY UPDATED")
+            return JsonResponse({"MESSAGE" : "UPDATED"}, status=200)
+        except PlayHistory.DoesNotExist:
+                print("Added to history")
+                PlayHistory.objects.create(user_id=user_id, movie_id=movie_id, episode=episode)
+                return JsonResponse({"MESSAGE" : "CREATED"}, status=200)
+
+        except ValueError:
+                return JsonResponse({"MESSAGE" : "VALUE_ERROR"}, status=404)
+        except KeyError:
+                return JsonResponse({"MESSAGE" : "KEY_ERROR"}, status=404)
+
+    @login_decorator
+    def get(self, request, movie_id):
+        print("History called")
+        try:
+            user_id = request.user.id
+            print("user_id",user_id)
+            play_history = PlayHistory.objects.get(user_id=user_id, movie_id=movie_id)
+            print("Playlist exist!")
+            play_history_info = {
+                "episode" : play_history.episode.name,
+                "episode_id" : play_history.episode.link,
+                "last_played" : play_history.last_played
+            }
+            print(play_history_info)
+            return JsonResponse({"play_history_info" : play_history_info}, status=200)
+        except PlayHistory.DoesNotExist:
+            print("no history found...")
+            play_history_info = {
+                "episode" : None,
+                "episode_id" : None,
+                "last_played" : None
+            }
+
+            return JsonResponse({"play_history_info" : play_history_info}, status=200)

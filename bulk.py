@@ -2,7 +2,7 @@ import os
 import django
 import csv
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'atchapedia.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'app.settings')
 django.setup()
 
 from movies.models import *
