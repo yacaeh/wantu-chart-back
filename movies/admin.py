@@ -3,6 +3,8 @@ from django.contrib import admin
 from . import models
 from users.models import User
 from app.utils.youtube import get_channel_info, get_video_details, get_highlights, make_video_info_request, make_api_request, get_video_ids, process_playlist, API_KEY_LIST, API_INDEX,add_playlist_videos
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 
 @admin.register(models.Channel)
 class ChannelAdmin(admin.ModelAdmin):
@@ -33,6 +35,7 @@ class MovieParticipantInline(admin.TabularInline):
 
 # Register your models here.
 @admin.register(models.Movie)
+@method_decorator(cache_page(60*60*12))
 class MovieAdmin(admin.ModelAdmin):
     list_display = (
         "id",

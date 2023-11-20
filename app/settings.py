@@ -138,13 +138,13 @@ DATABASES = {
 if DEBUG is True :
     defaultDB = 'dev'
     STATICFILES_DIRS = [
-        path.join(BASE_DIR, 'media')
+        path.join(BASE_DIR, 'static')
     ]
 
 else:
     defaultDB = 'dev'
     STATICFILES_DIRS = [
-        path.join(BASE_DIR, 'media')
+        path.join(BASE_DIR, 'static')
     ]
 
 # Password validation

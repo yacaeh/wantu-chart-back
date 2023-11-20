@@ -122,6 +122,8 @@ class MovieView(View):
 
         q = Q()
         
+        if genre1 == "전체":
+            genre1 = ""
         if country_name == KOREAN_MOVIE:
             q.add(Q(country__name=KOREAN_MOVIE), q.AND)
 
