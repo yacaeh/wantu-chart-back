@@ -544,3 +544,44 @@ def add_playlist_videos(playlist, highlight=False):
           # Handle the error in the outer try block
           print(f"Caught an outer error: {outer_ve}")
 
+
+
+def update_daily_rank():
+
+    # Get wantu score of each movie
+    movies = Movie.objects.all()
+    
+    for movie in movies:
+        # Get wantu score of each movie
+        movie.wantu_score
+
+        # GET list of yesterday's daily ranks
+        yesterday = datetime.now().date() - datetime.timedelta(days=1)
+        yesterday_ranks = DailyRank.objects.filter(date=yesterday, genre='all')
+
+        # sort movies by wantu score
+        sorted_movies = Movie.objects.order_by('-wantu_score')
+        rank_updates = []
+        for index, movie in enumerate(sorted_movies):
+            rank_fluctuation = index - yesterday_ranks.rank, 
+            rank_updates.append(DailyRank(movie=movie, rank=index+1))
+
+            # { rank:1, rankFluc: 2, movie_id, wantu_score}
+            # 
+
+        # Now calculate fluctuation of each movie
+        # Get every movie's last day's rank and current rank and calculate fluctuation
+        # Get last day's rank
+
+
+
+        
+        
+
+        # Sort movies by each genre and order by wantu score
+        # Get all genres
+        genres = movie.genre.all()
+        for genre in genres:
+            sorted_movies = sorted_movies.filter(genre=genre).order_by('-wantu_score')
+
+        
