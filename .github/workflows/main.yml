@@ -19,17 +19,17 @@ jobs:
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-          REMOTE_HOST: ${{ secrets.HOST_DEV_DNS }}
+          REMOTE_HOST: ${{ secrets.HOST_DNS }}
           REMOTE_USER: ${{ secrets.USERNAME }}
           TARGET: ${{ secrets.TARGET_DIR }}
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@dce9d565de8d876c11d93fa4fe677c0285a66d78
         with:
-          host: ${{ secrets.HOST_DEV_DNS }}
+          host: ${{ secrets.HOST_DNS }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            cd /home/ubuntu/wantu-backend
+            cd /home/ubuntu/wantu-chart/wantu-chart-backend
             sudo docker-compose build
             sudo docker-compose up -d
