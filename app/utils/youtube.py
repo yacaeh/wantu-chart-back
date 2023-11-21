@@ -356,7 +356,8 @@ def get_highlights(video_ids):
     return response_list
 
 
-def add_playlist_videos(playlist):
+def add_playlist_videos(playlist, highlight=False):
+    global API_INDEX
     try:
         playlist_response = make_api_request(playlist)
         print("playlist_response passed")
@@ -404,10 +405,7 @@ def add_playlist_videos(playlist):
         integrated_video_info = process_playlist(video_ids)
         print("integrated_video_info",integrated_video_info)
         for episode in integrated_video_info:
-            print("video_info", episode)
             video_data = episode['statistics']
-            print("video_DATA",video_data)
-
             # 조회수
             view_count = int(video_data['viewCount']) if 'viewCount' in video_data else 0
             total_view_count += int(view_count)
@@ -440,11 +438,13 @@ def add_playlist_videos(playlist):
             episodeCommentCount = comment_count
             episodeDislikeCount = dislike_count
             episodeDuration = duration
-            try:
-                highlight = get_highlights([episodeId])[0]['mostReplayed']
-                episodeHighlights = {"start": highlight['heatMarkersDecorations'][0]['timedMarkerDecorationRenderer']['visibleTimeRangeStartMillis'], "end":highlight['heatMarkersDecorations'][0]['timedMarkerDecorationRenderer']['visibleTimeRangeEndMillis']}
-            except :
-                episodeHighlights = {"start":0, "end":5000}
+
+            if highlight:
+                try:
+                    highlight = get_highlights([episodeId])[0]['mostReplayed']
+                    episodeHighlights = {"start": highlight['heatMarkersDecorations'][0]['timedMarkerDecorationRenderer']['visibleTimeRangeStartMillis'], "end":highlight['heatMarkersDecorations'][0]['timedMarkerDecorationRenderer']['visibleTimeRangeEndMillis']}
+                except :
+                    episodeHighlights = {"start":0, "end":5000}
 
             print("Updating new_episode", episodeTitle)
             episode_defaults = {
@@ -456,9 +456,11 @@ def add_playlist_videos(playlist):
                 'commentCount': episodeCommentCount,
                 'dislikeCount': episodeDislikeCount,
                 'duration': episodeDuration,
-                'highlights': episodeHighlights,
                 'tags': episodeTags,
             }
+            if highlight:
+                episode_defaults['highlights'] = episodeHighlights
+
 
             matching_records = Episode.objects.filter(link=episodeId)
             if matching_records.count() > 1:

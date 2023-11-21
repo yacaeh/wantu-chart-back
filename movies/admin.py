@@ -35,27 +35,27 @@ class MovieParticipantInline(admin.TabularInline):
 
 # Register your models here.
 @admin.register(models.Movie)
-@method_decorator(cache_page(60*60*12))
 class MovieAdmin(admin.ModelAdmin):
+    search_fields = ('title', 'playlist')
     list_display = (
         "id",
         "title",
         "release_date",
         "description",
-        "running_time",
+        # "running_time",
         "poster_image",
         "trailer",
-        "channel",
+        # "channel",
         "playlist",
         )
-    inlines = [MovieGenreInline,MovieCountryInline,MovieEpisodeInline,MovieParticipantInline]
+    inlines = [MovieGenreInline]
     def save_model(self, request: Any, obj: Any, form: Any, change: Any) -> None:
         # Save other episodes...        
         super().save_model(request, obj, form, change)
 
         print("SAVE MODEL!!!")
         # Get channel info
-        add_playlist_videos(obj.playlist)
+        add_playlist_videos(obj.playlist, True)
 
 
 @admin.register(models.Grade)
@@ -114,6 +114,7 @@ class CountryAdmin(admin.ModelAdmin):
 
 @admin.register(models.Episode)
 class EpisodeAdmin(admin.ModelAdmin):
+    search_fields = ('name', 'link')
     list_display = (
         "name",
         "link",

@@ -1,40 +1,35 @@
-name: Deploy Django project
+name: Push-to-EC2
 
+# Trigger deployment only on push to master branch
 on:
   push:
     branches:
-      - main
+      - develop
 
 jobs:
-  build:
+  deploy:
+    name: Deploy to EC2 on master branch push
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout the files
         uses: actions/checkout@v2
 
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v3.1.3
+      - name: Deploy to Server 1
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.HOST_DEV_DNS }}
+          REMOTE_USER: ${{ secrets.USERNAME }}
+          TARGET: ${{ secrets.TARGET_DIR }}
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@dce9d565de8d876c11d93fa4fe677c0285a66d78
         with:
-          python-version: '3.8'
-
-      - name: Generate deployment package
-        run: zip -r deploy.zip . -x '*.git*'
-
-      - name: Get current time
-        uses: 1466587594/get-current-time@v2
-        id: current-time
-        with:
-          format: YYYY-MM-DDTHH-mm-ss
-          utcOffset: '+09:00'
-
-      - name: Deploy to EB
-        uses: einaregilsson/beanstalk-deploy@v21
-
-        with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: catmemetest #EB 애플리케이션명
-          environment_name: Catmemetest-env #EB 환경명
-          version_label: github-action-${{steps.current-time.outputs.formattedTime}}
-          region: ap-northeast-2
-          deployment_package: deploy.zip
+          host: ${{ secrets.HOST_DEV_DNS }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: | 
+            cd /home/ubuntu/wantu-backend
+            sudo docker-compose build
+            sudo docker-compose up -d

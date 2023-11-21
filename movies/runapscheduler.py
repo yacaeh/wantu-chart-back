@@ -59,7 +59,7 @@ def my_daily_job(index=0):
     for playlist in movies_playlist:
         add_playlist_videos(playlist)
 def my_job_a():
-#   my_daily_job(422)
+  my_daily_job(1)
   # 실행시킬 Job
   # 여기서 정의하지 않고, import 해도 됨
 
