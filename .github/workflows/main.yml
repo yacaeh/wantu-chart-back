@@ -4,7 +4,7 @@ name: Push-to-EC2
 on:
   push:
     branches:
-      - develop
+      - main
 
 jobs:
   deploy:
@@ -29,7 +29,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
-          script: | 
+          script: |
             cd /home/ubuntu/wantu-backend
             sudo docker-compose build
             sudo docker-compose up -d
