@@ -269,7 +269,7 @@ class MyPlayHistoryView(View):
             "avg"      : h.movie.average_rating,
             "poster"   : h.movie.poster_image,
             "trailer"  : h.movie.trailer,
-            "date"     : h.date,
+            "last_played"     : h.last_played,
         }for h in play_history]
 
         return JsonResponse({"result" :history_list}, status=200)

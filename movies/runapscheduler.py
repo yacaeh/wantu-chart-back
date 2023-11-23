@@ -59,7 +59,7 @@ def my_daily_job(index=0):
     for playlist in movies_playlist:
         add_playlist_videos(playlist)
 def my_job_a():
-  my_daily_job(1)
+  my_daily_job()
   # 실행시킬 Job
   # 여기서 정의하지 않고, import 해도 됨
 
@@ -82,7 +82,7 @@ def start():
   scheduler = BackgroundScheduler(timezone=TIME_ZONE) # BlockingScheduler를 사용할 수도 있습니다.
   scheduler.add_jobstore(DjangoJobStore(), "default") 
 
-  my_job_a() # 한번 실행해주고 시작합니다.
+  # my_job_a() # 한번 실행해주고 시작합니다.
   scheduler.add_job(
     my_job_a,
     trigger=CronTrigger(hour='12'),  # 12시 마다 작동합니다.
