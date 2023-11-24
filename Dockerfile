@@ -3,6 +3,7 @@
 # Django 최상위 루트에서 작성
 FROM python:3.8
 RUN mkdir -p /usr/src/app/static
+RUN mkdir -p /usr/src/app/media
 # 컨테이너 내에서 코드가 실행될 경로 설정
 ENV APP_HOME=/usr/src/app
 
