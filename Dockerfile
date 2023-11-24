@@ -17,4 +17,4 @@ RUN pip install -r requirements.txt
 # Project를 /usr/src/app으로 복사
 COPY . .
 RUN python manage.py collectstatic --noinput
-ENV DEBUG False
+ENV DEBUG True
