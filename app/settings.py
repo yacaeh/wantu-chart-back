@@ -218,18 +218,18 @@ CORS_ALLOW_METHODS = (
     'PUT',
 )
 
-# CORS_ALLOW_HEADERS = (
-#     'accept',
-#     'accept-encoding',
-#     'authorization',
-#     'content-type',
-#     'dnt',
-#     'origin',
-#     'user-agent',
-#     'x-csrftoken',
-#     'x-requested-with',
-# 		#만약 허용해야할 추가적인 헤더키가 있다면?(사용자정의 키) 여기에 추가하면 됩니다.
-# )
+CORS_ALLOW_HEADERS = (
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+		#만약 허용해야할 추가적인 헤더키가 있다면?(사용자정의 키) 여기에 추가하면 됩니다.
+)
 YOUTUBE_API_KEY=env('YOUTUBE_API_KEY')
 YOUTUBE_API_URL="https://www.googleapis.com/youtube/v3"
 LOCAL_YOUTUBE_API_URL=env('LOCAL_YOUTUBE_API_URL')
