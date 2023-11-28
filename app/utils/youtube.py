@@ -5,7 +5,7 @@ import json
 import re
 from googleapiclient.discovery import build #pip install google-api-python-client 필요
 from googleapiclient.errors import HttpError
-from movies.models import Movie, Episode, DailyView, DailyRank, WeeklyRank, MonthlyRank
+from movies.models import Movie, Episode, DailyView, DailyRank, WeeklyRank, MonthlyRank, Genre
 import time
 from datetime import datetime
 
@@ -357,6 +357,7 @@ def get_highlights(video_ids):
 
 
 def add_playlist_videos(playlist, highlight=False):
+
     global API_INDEX
     try:
         playlist_response = make_api_request(playlist)
@@ -364,6 +365,7 @@ def add_playlist_videos(playlist, highlight=False):
         # 동영상 수
         # video_count = playlist_response['pageInfo']['totalResults']
         video_count = len(playlist_response)
+        print(video_count)
     except HttpError as e:
         if e.resp.status == 404:
             print("Resource not found. Handle 404 error here.")
@@ -478,7 +480,9 @@ def add_playlist_videos(playlist, highlight=False):
             print(new_episode.viewCount,"This should not be 0...")
 
             movie.episode.through.objects.update_or_create(movie_id=movie.id, episode_id=new_episode.pk)
-
+            
+            # Add genre to movie if genre is not empty
+            # Create genre by it's name if it doesn't exist
             # Update DailyView table
             defaults = {'views': episodeViewCount, 'likes': episodeLikeCount, 'comments': episodeCommentCount, 'dislikes': dislike_count }
             print("UPDATED!!!!")

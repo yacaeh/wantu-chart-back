@@ -10,8 +10,12 @@ from apscheduler.triggers.cron import CronTrigger
 import csv
 import os
 from googleapiclient.errors import HttpError
-from movies.models import Movie, Episode, DailyView, DailyRank, WeeklyRank, MonthlyRank
+from movies.models import Movie, Episode, DailyView, DailyRank, WeeklyRank, MonthlyRank, Genre
 from app.utils.youtube import get_channel_info, get_video_details, get_highlights, make_video_info_request, make_api_request, get_video_ids, process_playlist, API_KEY_LIST, API_INDEX,add_playlist_videos
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+import re
+
 # AIzaSyC9NVqk0XjmU3BP26njxMJoQWmmg0IjlJQ
 # AIzaSyDlo1ez9E0Zh81kij8v4Ipx0NWVRrocx0w
 # AIzaSyDHABt7h3oLJiC64F3QPdBt8DKY7BwDckw
@@ -25,6 +29,56 @@ def get_or_create_csv(file_path, header):
     else:
         # File already exists, no need to create a new one
         pass
+    
+def update_googlesheet():
+    # 사용하려는 API
+    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+
+    # 인증정보 파일을 통한 인증
+    credentials = ServiceAccountCredentials.from_json_keyfile_name('../Wantu-Chart IAM.json', scope)
+
+    gc = gspread.authorize(credentials)
+
+    # 구글 스프레드시트의 이름
+    spreadsheet_url = 'https://docs.google.com/spreadsheets/d/1-1j55mkrY_Tyi8K2TT9eGJiRA1wcychZIbOC5kOoUoQ/edit#gid=1600710680'
+
+    # 스프레드시트 열기
+    doc = gc.open_by_url(spreadsheet_url)
+    # a 시트 불러오기
+    worksheet = doc.get_worksheet(6)
+    # 모든 데이터 가져오기
+    data = worksheet.get_all_values()
+    data = data[1:]
+    for item in data:
+        if item[0] != '완료':
+            playlistName = item[1]
+            description = item[2]
+            publishedAt = item[3]
+            trailer = item[4]
+            playlist = item[5]
+            genre = item[6]
+            poster_image = "https://i.ytimg.com/vi/"+trailer+"/hqdefault.jpg"
+            cleaned_text = re.sub("[0-9. ]", "", genre)
+            try:
+                new_movie = Movie.objects.get(title=playlistName, trailer=trailer, playlist=playlist)
+                print("movie already exists")
+                worksheet.update_acell('A'+str(data.index(item)+2), '완료')
+
+
+            # instances.append(Movie(title=playlistName, trailer=trailer, playlist=playlist, poster_image=poster_image, channel=channel, release_date=publishedAt, description=description))
+            except Movie.DoesNotExist:
+                new_movie = Movie.objects.create(title=playlistName, trailer=trailer, playlist=playlist, poster_image=poster_image,  description=description)
+                new_id = new_movie.pk
+                if genre != '':
+                  genre, created = Genre.objects.get_or_create(name=genre)
+                  new_movie.genre.add(genre)
+                  print("Genre added to movie", genre.name)
+                new_movie.genre.through.objects.update_or_create(movie_id=new_id, genre_id=genre.pk)
+                print(playlist, cleaned_text)
+                add_playlist_videos(playlist, True)
+                worksheet.update_acell('A'+str(data.index(item)+2), '완료')
+
+   
 
 def save_data_to_csv(file_path, data):
     with open(file_path, 'a', newline='') as file:
@@ -83,6 +137,7 @@ def start():
   scheduler.add_jobstore(DjangoJobStore(), "default") 
 
   # my_job_a() # 한번 실행해주고 시작합니다.
+  update_googlesheet()
   scheduler.add_job(
     my_job_a,
     trigger=CronTrigger(hour='12'),  # 12시 마다 작동합니다.

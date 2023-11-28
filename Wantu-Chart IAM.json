@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "wantu-chart-395701",
+  "private_key_id": "0a7b8e3da845ac2c80859399f09735349c7b5a93",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDJqd+o18zUJe25\nKO3T0pkU1dxhEY1XMsT9fjltvOjXdanQ2cB2+2VTnh/HEiyOTIqdzH7tGoP3qGHB\nTinDEi3lPKVyJOMTEKxg0Y6IjrSL+USsRAGIaroMgoaNVRS3lioF0fWa6+Ds7Bd2\nJGBgAJL/SoNzG7IgscdIHraSxbYMAX7uXNGTAfFxbor5TSV/PhFbW39cTODT9ncb\n4BbJx6RadTn3xoqPsVsA7c+1j+Lg0IYMaMYTtPyOJHfiqAhtBcRIr8ii84pmUh/y\nRm0haejYKL4j8k6t0nfSCCdhbF6bmJXay4dSdJB5XKJz9hVKHZoXFdZrVPFaMRBB\neVyoej3hAgMBAAECggEARW1M2WGWHHGEYqsjGbpWxnQMH4T97ofFhuoGVm/jj43s\nLUFSQAQzsbJuCUiJ+2GBlWr6RaHLzh7zrKu+t/BRyapz4RSu8njah6iNlBjhMpFa\nIZ52EqN/st/a99xTOhMiG4fZsQDFGnv7ZcqHPXXlJavfDml6DUR3Ma6VN3mGv6HF\npUXEG47zflqHM/fbpAZSFd9l/WV3TR6pffc5B8EMEsyZthwJgLczq80uunHwyqey\nd6DXvVaNcbBiDIee1BRCdloZuV8aJvDZ5QZ5efXleelIK1+OkyTbcW6lry2ifpnz\nRwH+DnMvEhDSfK1fm9vGxHfq1IVx6E6g/73u23mSMwKBgQDr011xdx2chW8zZCqZ\ng0gVsxaIN2hh3oHa+R338TCjG8rMfEEFaNkoT/vldKgNNAab1BYbBcGqmmiuNWtK\nGcPdIhDkGui2WZsXyw7Fy03Tz6rr5Z1EYcIYTAGgA7PwKtWK1jeYZPr2egLlZRjv\nFoKh7O0U3hKv8ACoUqceZk07UwKBgQDa6ln6B1TyzTb7ySJY1iwu0L3fam26Ca49\n8X79ihQa4ibrMOZqeUukTpMWnbAPN2f3iW2bD1TWiTvcl4eri36CLeGufU+Kfz58\nQVURnhYNZjnG3fooQqRD1dtVDZbrE5Nfg5LQoj8faN3GO0TfnSZJ5/ItWnJ3ctFH\n+NFuScuvewKBgQDkf9fB0mXpvEzEIeE4/8B/7hf+ApnsgpmWH92O2a+Dy7ETs62Y\n3T/U1LNBYGhY6rkgkj6dDlXZxWV6rx33HcHvaUuuifhEf8xMIJ9+vX/6pPR7P+/D\nS2my+ypz7kKSih6BORGDYwzcd9qIhQ3E1C3dUeFiX88BlG4+ql9tkDhzKwKBgG5N\nGErXeODhr2uL+2dhel+YQ6MXX/QVvpptXLvo35pwCoYEXISXWxqNkKUbjMMN+q+J\nqhUv02JJQUUzgGNZ5MM41PZzIym4VUaMMI2w5pGXyVK/M7UnZtbbISkosLr/YQkG\nJWpD5aQw1VV1NY2qA8nHOYnKgdRXoMUvxG5admuTAoGBAOqCl2iXYEJoChmkf8bT\nH7jQQ7WLIpu17fTDo/149Y6tU3BPLS/QvWVMPUa1V+1/XX5H6PGohunvAC9XBEAv\n5jKBN5dDy9So2mPIgAxYkF6lVrZbLmKfKY/UM/UKbtHOdkpIYrTTP72UXF5CgMkL\n7hgIX3y5hYuL+qNKQKbCaNHb\n-----END PRIVATE KEY-----\n",
+  "client_email": "wantuchart@wantu-chart-395701.iam.gserviceaccount.com",
+  "client_id": "102457051562572747307",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/wantuchart%40wantu-chart-395701.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
