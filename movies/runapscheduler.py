@@ -35,7 +35,7 @@ def update_googlesheet():
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 
     # 인증정보 파일을 통한 인증
-    credentials = ServiceAccountCredentials.from_json_keyfile_name('../Wantu-Chart IAM.json', scope)
+    credentials = ServiceAccountCredentials.from_json_keyfile_name('IAM.json', scope)
 
     gc = gspread.authorize(credentials)
 
