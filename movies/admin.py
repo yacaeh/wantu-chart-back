@@ -130,3 +130,14 @@ class BannerAdmin(admin.ModelAdmin):
         "type",
         "order"
     )
+
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "name",
+        "email",
+        "introduction",
+        "image_url",
+        "google_token",
+    )
