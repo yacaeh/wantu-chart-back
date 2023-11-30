@@ -208,7 +208,9 @@ APPEND_SLASH = False
 ##CORS
 CORS_ALLOW_ALL_ORIGINS = True
 # CORS_ALLOW_CREDENTIALS=True
-CORS_ALLOWED_ORIGINS = ['*']
+CORS_ALLOWED_ORIGINS = [    "http://localhost:3000",
+                        "https://chart.wantu.io",
+]
 # CORS_ALLOW_METHODS = (
 #     'DELETE',
 #     'GET',
