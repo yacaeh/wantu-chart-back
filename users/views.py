@@ -263,13 +263,15 @@ class MyPlayHistoryView(View):
     def get(self, request):
         user_id = request.user.id
         play_history = PlayHistory.objects.filter(user_id=user_id)
+        print(play_history)
         history_list = [{
             "movie_id" : h.movie.id,
-            "title"    : h.movie.title,
-            "avg"      : h.movie.average_rating,
-            "poster"   : h.movie.poster_image,
+            "movie_name"    : h.movie.title,
+            "average_rating"      : h.movie.average_rating,
+            "poster_image"   : h.movie.poster_image,
             "trailer"  : h.movie.trailer,
             "last_played"     : h.last_played,
+            "episode_name" : h.episode.name,
         }for h in play_history]
-
+        print(history_list)
         return JsonResponse({"result" :history_list}, status=200)

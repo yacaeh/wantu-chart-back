@@ -122,10 +122,11 @@ def update_review_sample():
                 rating = float(rating)
 
                 try:
-                    Rating.objects.create(user=user, movie=Movie.objects.get(playlist=playlist), rate=rating, comment=comment, spoiler=False)
+                    Rating.objects.create(user=user, movie=Movie.objects.filter(playlist=playlist)[0], rate=rating, comment=comment, spoiler=False)
 
                 except KeyError:
                     print("ERROR")
+                    
             # Update status
             worksheet.update_acell('O'+str(data.index(item)+2), '완료')
                         
@@ -240,7 +241,7 @@ def start():
   # my_job_a() # 한번 실행해주고 시작합니다.
   update_googlesheet()
   # create_test_users(100)
-  # update_review_sample()
+  update_review_sample()
   scheduler.add_job(
     my_job_a,
     trigger=CronTrigger(hour='12'),  # 12시 마다 작동합니다.

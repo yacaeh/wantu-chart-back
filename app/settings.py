@@ -23,7 +23,6 @@ DEBUG = env.bool('DEBUG')
 REDIS_HOST = env('REDIS_HOST')
 print(DEBUG, REDIS_HOST)
 
-ALLOWED_HOSTS = ['*']
 EXCLUDED_DIRS=['static']
 
 # Application definition
@@ -206,19 +205,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 APPEND_SLASH = False
 
 ##CORS
-# CORS_ALLOW_CREDENTIALS = True
-# CORS_ALLOW_HEADERS = [
-#     'accept',
-#     'accept-encoding',
-#     'authorization',
-#     'content-type',
-#     'enctype',
-#     'dnt',
-#     'origin',
-#     'user-agent',
-#     'x-csrftoken',
-#     'x-requested-with',
-# ]
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'enctype',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 CORS_ORIGIN_ALLOW_ALL = True
 ALLOWED_HOSTS = ['*']
 CORS_ALLOW_METHODS = [
@@ -229,7 +228,6 @@ CORS_ALLOW_METHODS = [
     'POST',
     'PUT',
 ]
-
 YOUTUBE_API_KEY=env('YOUTUBE_API_KEY')
 YOUTUBE_API_URL="https://www.googleapis.com/youtube/v3"
 LOCAL_YOUTUBE_API_URL=env('LOCAL_YOUTUBE_API_URL')
