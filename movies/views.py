@@ -721,3 +721,86 @@ class PlayHistoryView(View):
             }
 
             return JsonResponse({"play_history_info" : play_history_info}, status=200)
+
+class MainTopRankView(View):
+    # @method_decorator(cache_page(60*60*1))
+    def get(self, request):
+        try:
+            genres = Genre.objects.all()
+            result = []
+
+            for genre in genres:
+                movies = Movie.objects.filter(genre=genre).order_by('-wantu_score')[:20]
+                movie_list = [{
+                    "country_name"   : [country.name for country in movie.country.all()],
+                    "movie_name"     : movie.title,
+                    "movie_id"       : movie.id,
+                    "total_views"     : movie.total_views,
+                    "total_likes"     : movie.total_likes,
+                    "total_comments"  : movie.total_comments,
+                    "total_episodes"  : movie.total_videos,
+                    "total_videos" : movie.total_videos,
+                    "wantu_score" : movie.wantu_score,
+                    "is_new" : movie.is_new,
+                    "released_date"  : movie.release_date,
+                    "average_rating" : movie.average_rating,
+                    "poster_image"   : movie.poster_image,
+                    "trailer"        : movie.trailer,
+                    "genres"         : [genre.name for genre in movie.genre.all()],
+                } for movie in movies]
+
+                result.append({
+                    "genre": genre.name,
+                    "top_movies": movie_list
+                })
+
+            recently_added = Movie.objects.order_by('-last_updated')[:10]
+            recently_added_list = [{
+                "country_name"   : [country.name for country in movie.country.all()],
+                "movie_name"     : movie.title,
+                "movie_id"       : movie.id,
+                "total_views"     : movie.total_views,
+                "total_likes"     : movie.total_likes,
+                "total_comments"  : movie.total_comments,
+                "total_episodes"  : movie.total_videos,
+                "total_videos" : movie.total_videos,
+                "wantu_score" : movie.wantu_score,
+                "is_new" : movie.is_new,
+                "released_date"  : movie.release_date,
+                "average_rating" : movie.average_rating,
+                "poster_image"   : movie.poster_image,
+                "trailer"        : movie.trailer,
+                "genres"         : [genre.name for genre in movie.genre.all()],
+            } for movie in recently_added]
+
+            result.append({
+                "recently_added": recently_added_list
+            })
+
+            top_rated = Movie.objects.order_by('-wantu_score')[:10]
+            top_rated_list = [{
+                "country_name"   : [country.name for country in movie.country.all()],
+                "movie_name"     : movie.title,
+                "movie_id"       : movie.id,
+                "total_views"     : movie.total_views,
+                "total_likes"     : movie.total_likes,
+                "total_comments"  : movie.total_comments,
+                "total_episodes"  : movie.total_videos,
+                "total_videos" : movie.total_videos,
+                "wantu_score" : movie.wantu_score,
+                "is_new" : movie.is_new,
+                "released_date"  : movie.release_date,
+                "average_rating" : movie.average_rating,
+                "poster_image"   : movie.poster_image,
+                "trailer"        : movie.trailer,
+                "genres"         : [genre.name for genre in movie.genre.all()],
+            } for movie in top_rated]
+
+            result.append({
+                "top_rated": top_rated_list
+            })
+
+
+            return JsonResponse({"result": result}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)

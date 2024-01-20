@@ -1,6 +1,6 @@
 from django.db import models
 from movies.models import *
-
+from app.models import *
 class User(models.Model):
 
     name         = models.CharField(max_length=45)
@@ -17,8 +17,35 @@ class User(models.Model):
         return self.name
 
 
+# class Feed(models.Model):
+#     user = models.ForeignKey('User', models.CASCADE)
+#     rating = models.ForeignKey('movies.Rating', models.CASCADE, null=True, blank=True)
+#     reply = models.ForeignKey('Reply', models.CASCADE, null=True, blank=True)
+#     hashtag = models.ForeignKey('Hashtag', models.CASCADE, null=True, blank=True)
+#     created_at = models.DateTimeField(auto_now_add=True)
+
+#     class Meta:
+#         managed = True
+#         db_table = 'feed'
+
 class Reply(models.Model):
     rating = models.ForeignKey('movies.Rating', models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey('User', models.CASCADE)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    feed = models.ForeignKey('app.Feed', models.CASCADE, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'reply'
+
+
+
+
+class NestedReply(models.Model):
+    nested_reply_id = models.AutoField(primary_key=True)
+    reply = models.ForeignKey('Reply', models.CASCADE)
     user = models.ForeignKey('User', models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -26,34 +53,5 @@ class Reply(models.Model):
 
     class Meta:
         managed = True
-        db_table = 'reply'
+        db_table = 'nested_reply'
 
-
-class Like(models.Model):
-    user = models.ForeignKey('User', models.CASCADE)
-    rating = models.ForeignKey('movies.Rating', models.CASCADE, null=True, blank=True)
-    reply = models.ForeignKey('Reply', models.CASCADE, blank=True, null=True)
-
-    class Meta:
-        managed = True
-        db_table = 'like'
-
-
-class Hashtag(models.Model):
-    hashtag_id = models.AutoField(primary_key=True)
-    text = models.CharField(max_length=255)
-
-    class Meta:
-        managed = True
-        db_table = 'hashtag'
-
-class Following(models.Model):
-    user = models.ForeignKey('User', models.CASCADE, related_name='follower_id')
-    follow_user = models.ForeignKey('User', models.CASCADE, related_name='following_id', blank=True, null=True)
-    hashtag = models.ForeignKey('Hashtag', models.CASCADE, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        managed = True
-        db_table = 'following'

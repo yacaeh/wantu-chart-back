@@ -18,6 +18,7 @@ import re
 import random
 from users.models import User
 import string
+from app.utils.utils import add_allowlist, send_email
 # AIzaSyC9NVqk0XjmU3BP26njxMJoQWmmg0IjlJQ
 # AIzaSyDlo1ez9E0Zh81kij8v4Ipx0NWVRrocx0w
 # AIzaSyDHABt7h3oLJiC64F3QPdBt8DKY7BwDckw
@@ -165,6 +166,7 @@ def update_googlesheet():
                 new_movie = Movie.objects.get(title=playlistName, trailer=trailer, playlist=playlist)
                 print("movie already exists")
                 worksheet.update_acell('A'+str(data.index(item)+2), '완료')
+                continue
 
 
             # instances.append(Movie(title=playlistName, trailer=trailer, playlist=playlist, poster_image=poster_image, channel=channel, release_date=publishedAt, description=description))
@@ -178,6 +180,9 @@ def update_googlesheet():
                 new_movie.genre.through.objects.update_or_create(movie_id=new_id, genre_id=genre.pk)
                 print(playlist, cleaned_text)
                 add_playlist_videos(playlist, True)
+                worksheet.update_acell('A'+str(data.index(item)+2), '완료')
+            except Movie.MultipleObjectsReturned:
+                print("Multiple objects returned")
                 worksheet.update_acell('A'+str(data.index(item)+2), '완료')
 
    
@@ -237,9 +242,11 @@ def start():
   # def handle(self, *args, **options):
   scheduler = BackgroundScheduler(timezone=TIME_ZONE) # BlockingScheduler를 사용할 수도 있습니다.
   scheduler.add_jobstore(DjangoJobStore(), "default") 
-
+  email = 'yoonseok@wantu.io'
+  # add_allowlist(email)
+  # send_email(email, '경인', '원투차트 주간 콘텐츠 업데이트 알림')
   # my_job_a() # 한번 실행해주고 시작합니다.
-  update_googlesheet()
+  # update_googlesheet()
   # create_test_users(100)
   update_review_sample()
   scheduler.add_job(

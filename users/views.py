@@ -134,6 +134,7 @@ class RatingsView(View):
                 "series"      : rating.movie.title,
                 "trailer"     : rating.movie.trailer,
                 "movie_id"    : rating.movie.id,
+                "like_count"  : rating.like_set.count(),
             }for rating in ratings]
             
             return JsonResponse({"results" : comment_list, "total":ratings.count(), "is_mine":is_mine}, status=200)

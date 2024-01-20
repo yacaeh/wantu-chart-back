@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from users.models           import User, Reply, Like, Following, Hashtag
+from movies.models import Rating
+from users.models           import User, Reply
+from app.models import Following
 class UserSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -33,6 +35,34 @@ class ReplySerializer(serializers.ModelSerializer):
         model = Reply
         fields = ('reply_id','user','text','created_at','updated_at','nested_reply_cnt','like_cnt','whether_liked','report_cnt','whether_reported')
 
+
+
+class RatingSerializer(serializers.ModelSerializer):
+    user = UserSimpleSerializer(read_only=True)
+    reply_cnt = serializers.SerializerMethodField('_reply_cnt')
+    like_cnt = serializers.SerializerMethodField('_like_cnt')
+    whether_liked = serializers.SerializerMethodField('_whether_liked')
+    # whether_reported = serializers.SerializerMethodField('_whether_reported')
+
+    def _reply_cnt(self, obj):
+        return obj.reply_set.count()
+
+    def _like_cnt(self, obj):
+        return obj.like_set.count()
+
+    def _whether_liked(self, obj):
+        return bool(obj.like_set.filter(user_id=obj.id, reply_id=obj.reply_id))
+
+
+    # def _report_cnt(self, obj):
+    #     return obj.report_set.count()
+
+    # def _whether_reported(self, obj):
+    #     return bool(obj.report_set.filter(user_id=obj.id, reply_id=obj.reply_id))
+
+    class Meta:
+        model = Rating
+        fields = ('rating_id','rate','user','text','created_at','updated_at','nested_reply_cnt','like_cnt','whether_liked','report_cnt','whether_reported')
 
 
 class UserSimpleFollowingSerializer(serializers.ModelSerializer):

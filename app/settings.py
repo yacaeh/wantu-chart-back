@@ -1,11 +1,11 @@
 from pathlib     import Path
 import environ
-import pymysql
+# import pymysql
 from os import path
 import sys
 import os
 
-pymysql.install_as_MySQLdb()
+# pymysql.install_as_MySQLdb()
 env = environ.Env()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,10 +37,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'bulk_update_or_create',
+    'app',
     'users',
+    's3',
+    'feed',
     'movies',
     'debug_toolbar',
-    'django_apscheduler'
+    'drf_yasg',
+    'django_apscheduler',
+    'rest_framework',
 ]
 
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
@@ -231,6 +236,8 @@ CORS_ALLOW_METHODS = [
 YOUTUBE_API_KEY=env('YOUTUBE_API_KEY')
 YOUTUBE_API_URL="https://www.googleapis.com/youtube/v3"
 LOCAL_YOUTUBE_API_URL=env('LOCAL_YOUTUBE_API_URL')
+MAILCHIMP_API_KEY=env('MAILCHIMP_API_KEY')
+MANDRILL_API_KEY=env('MANDRILL_API_KEY')
 
 if 'runserver' in sys.argv:
     for exclude_dir in EXCLUDED_DIRS:

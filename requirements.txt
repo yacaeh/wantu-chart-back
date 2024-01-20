@@ -145,7 +145,7 @@ msgpack==1.0.4
 multiaddr==0.0.9
 multidict==6.0.4
 mypy-extensions==0.4.4
-mysqlclient==2.0.3
+mysqlclient==2.2.1
 netaddr==0.8.0
 openpyxl==3.0.10
 outcome==1.2.0
@@ -225,3 +225,4 @@ zipp==3.10.0
 zope.interface==5.5.2
 gspread==5.12.0
 oauth2client==4.1.3
+djangorestframework==3.14.0
