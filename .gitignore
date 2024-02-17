@@ -26,7 +26,12 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-
+temp
+shorts_bgm
+shorts_intro
+shorts_outro
+shorts_output
+generated
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
