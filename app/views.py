@@ -206,33 +206,18 @@ class NestedReplyDetailView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-
 class LikeView(APIView):
     @login_decorator
-
-    def get(self, request):
-        user_id = get_user_by_request(request).user_id
-        queryset = models.Like.objects.filter(user_id=user_id)
-
-        total = len(queryset)
-        likes = serializers.LikeCreateSerializer(queryset, many=True)
-        return jsonify(
-            data=likes.data,
-            total=total,
-            status=status.HTTP_200_OK
-        )
-
-    @login_decorator
-    
     def post(self, request):
         data = get_body(request)
         user_id = get_user_by_request(request).user_id
         rating_id = data.get('rating_id', None)
         reply_id = data.get('reply_id', None)
         nested_reply_id = data.get('nested_reply_id', None)
-        if not any([ rating_id, reply_id, nested_reply_id]):
+        feed_id = data.get('feed_id', None)  # Add this line
+        if not any([rating_id, reply_id, nested_reply_id, feed_id]):  # Update this line
             return jsonify(
-                error="rating_id or reply_id or nested_reply_id is required",
+                error="rating_id or reply_id or nested_reply_id or feed_id is required",  # Update this line
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -241,7 +226,8 @@ class LikeView(APIView):
                 user_id=user_id,
                 rating_id=rating_id,
                 reply_id=reply_id,
-                nested_reply_id=nested_reply_id
+                nested_reply_id=nested_reply_id,
+                feed_id=feed_id  # Add this line
             )
             like.delete()
 
@@ -250,7 +236,8 @@ class LikeView(APIView):
                 'user': user_id,
                 'rating': rating_id,
                 'reply': reply_id,
-                'nested_reply': nested_reply_id
+                'nested_reply': nested_reply_id,
+                'feed': feed_id  # Add this line
             })
             if like.is_valid():
                 like.save()

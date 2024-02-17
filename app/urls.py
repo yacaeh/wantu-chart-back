@@ -1,6 +1,6 @@
 from django.urls import path, include
 from django.contrib import admin
-from movies.views import movie_upload_from_csv, channel_upload_from_csv, episode_upload_from_csv, ChannelView, ChannelDetailView, LatestRateView
+from movies.views import movie_upload_from_csv, channel_upload_from_csv, episode_upload_from_csv, ChannelView, ChannelDetailView, LatestRateView,generate_video_view, list_created_files
 import debug_toolbar
 import app.views as views
 
@@ -26,5 +26,6 @@ urlpatterns = [
     path('api/v1/following', views.FollowingView.as_view(), name='following'),
     path('api/v1/following/<int:user_id>', views.FollowingUserDetailView.as_view(), name='following-user-detail'),
     path('api/v1/follower/<int:user_id>', views.FollowerUserDetailView.as_view(), name='follower-user-detail'),
-
+    path('api/v1/generate_video', generate_video_view, name='generate_video'),
+    path('api/v1/list-generate-video', list_created_files, name='list-generate-video'),   
 ]

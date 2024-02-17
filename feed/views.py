@@ -11,8 +11,8 @@ from app.utils.utils import get_body, jsonify
 from django.http import JsonResponse
 from drf_yasg import openapi
 from drf_yasg.utils import no_body, swagger_auto_schema
-
-
+from django.db.models import Count
+from movies.models import Genre
 class FeedView(APIView):
     @swagger_auto_schema(
         operation_summary="feed 리스트 보기",
@@ -64,7 +64,6 @@ class FeedView(APIView):
         search = request.GET.get('search', '')
         limit = int(request.GET.get('limit', 10))
         offset = int(request.GET.get('offset', 0))
-        search = request.GET.get('search', '')
 
         queryset = models.Feed.objects.filter()
         if search:
@@ -76,6 +75,7 @@ class FeedView(APIView):
         queryset = queryset[offset:offset + limit]
         total = len(queryset)
         feeds = serializers.FeedSerializer(queryset, many=True, context={'user_id': user_id})
+        print(feeds.data)
         return jsonify(
             data=feeds.data,
             total=total,
@@ -449,3 +449,103 @@ class FeedDetailView(APIView):
             feed.delete()
             
         return HttpResponse(status=status.HTTP_202_ACCEPTED)
+
+class PopularFeedView(APIView):
+
+    @swagger_auto_schema(
+        operation_summary="인기 피드 조회",
+        operation_description=
+        """
+            **Response**
+            ```
+            필요한 정보가 없습니다.
+            ```
+        """,
+        responses={
+            200: "성공적으로 조회 되었습니다.",
+            400: "response body의 detail을 읽어보세요.",
+        }
+    )
+    def get(self, request):
+        popular_feeds = models.Feed.objects.annotate(
+            num_likes=Count('like__feed')
+        ).order_by('-num_likes', '-created_at')
+
+        serializer = serializers.FeedSerializer(popular_feeds, many=True)
+        return JsonResponse(serializer.data, safe=False)    
+
+class FeedHashtagView(APIView):
+    @swagger_auto_schema(
+        operation_summary="해시태그에 맞는 피드 검색 및 최신 날짜순 정렬",
+        operation_description=
+        """
+            **Parameters**
+            - `hashtag`: 검색하고자 하는 해시태그
+            **Response**
+            ```
+            검색된 피드 목록이 반환됩니다.
+            ```
+        """,
+        responses={
+            200: "성공적으로 조회 되었습니다.",
+            400: "response body의 detail을 읽어보세요.",
+        }
+    )
+    def get(self, request):
+        hashtag = request.GET.get('hashtag', None)
+        if not hashtag:
+            return JsonResponse(
+                {"error": "hashtag parameter is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        feeds = models.Feed.objects.filter(
+            hashtags__name=hashtag
+        ).order_by('-created_at')
+        
+        serializer = serializers.FeedSerializer(feeds, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+class FeedAllGenreView(APIView):
+    @swagger_auto_schema(
+        operation_summary="모든 장르의 피드를 해시태그와 함께 반환",
+        operation_description=
+        """
+            **Parameters**
+            - `hashtag`: 검색하고자 하는 해시태그
+            **Response**
+            ```
+            각 장르별로 최신 날짜순으로 정렬된 피드 목록이 반환됩니다.
+            ```
+        """,
+        responses={
+            200: "성공적으로 조회 되었습니다.",
+            400: "response body의 detail을 읽어보세요.",
+        }
+    )
+    def get(self, request):
+        genres = Genre.objects.all()
+        result = []
+
+        for genre in genres:
+            hashtag, created = models.Hashtag.objects.get_or_create(text=genre.name)
+            if created:
+                hashtag.save()
+
+            feed = models.Feed.objects.filter(
+                feedhashtag__hashtag=hashtag
+            ).order_by('-created_at').first()
+
+            if feed is not None:
+                serializer = serializers.FeedSerializer(feed)
+                feed_data = serializer.data
+                feed_data['genre'] = genre.name  # 장르 필드 추가
+                result.append(feed_data)
+            else:
+                result.append({'genre': genre.name})  # 장르만 있는 데이터 추가
+
+        return jsonify(
+            data=result,
+            total=len(result),
+            status=status.HTTP_200_OK
+        )

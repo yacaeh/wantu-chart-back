@@ -246,9 +246,9 @@ def start():
   # add_allowlist(email)
   # send_email(email, '경인', '원투차트 주간 콘텐츠 업데이트 알림')
   # my_job_a() # 한번 실행해주고 시작합니다.
-  # update_googlesheet()
+  update_googlesheet()
   # create_test_users(100)
-  update_review_sample()
+  # update_review_sample()
   scheduler.add_job(
     my_job_a,
     trigger=CronTrigger(hour='12'),  # 12시 마다 작동합니다.

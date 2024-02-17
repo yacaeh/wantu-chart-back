@@ -2,10 +2,11 @@ import json
 from json.decoder import JSONDecodeError
 from decimal import *
 
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, FileResponse, Http404
 from django.views import View
 from django.db.models import Q, Avg
 from django.core.exceptions import ValidationError
+from django.urls import reverse
 
 from users.utils import login_decorator
 from movies.models import Movie, MovieParticipant, Channel, Rating, MovieGenre, MovieEpisode, Episode, Genre, Country, WishList, PlayHistory
@@ -20,6 +21,10 @@ import re
 from datetime import datetime, timedelta
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
+from .forms import ShortsVideoCreatorForm
+from app.utils.shorts import VideoCreator
+import os
+import requests
 
 ManyToManySpec = namedtuple(
     "ManyToManySpec", ["from_object", "to_object"]
@@ -804,3 +809,123 @@ class MainTopRankView(View):
             return JsonResponse({"result": result}, status=200)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
+
+
+def generate_video_view(request):
+    url = "https://api.elevenlabs.io/v1/voices"
+    headers = {"xi-api-key": os.environ["ELEVENLABS_API"]}
+
+    response = requests.get(url, headers=headers)
+    cloned_voices = []
+    if response.status_code == 200:
+        data = response.json()
+        cloned_voices = [
+            {"voice_id": voice["voice_id"], "name": voice["name"]}
+            for voice in data.get("voices", [])
+            if voice["category"] == "cloned"
+        ]
+
+    if request.method == 'POST':
+        form = ShortsVideoCreatorForm(request.POST)
+        if form.is_valid():
+            print("This is valid form")
+            title = form.cleaned_data['title']
+            videos_info = form.cleaned_data['videos_info']
+            voice_id = form.cleaned_data['voice_id']
+            intro_text = form.cleaned_data['intro_text']
+            outro_text = form.cleaned_data['outro_text']
+            background_mp3 = request.FILES.get('background_mp3')            
+            intro_video = request.FILES.get('intro_video_file')
+            outro_video = request.FILES.get('outro_video_file')
+
+            background_mp3_path = None
+            intro_file_path = None
+            outro_file_path = None
+
+            if background_mp3:
+                if not os.path.exists('shorts_bgm'):
+                    os.makedirs('shorts_bgm', exist_ok=True)
+                background_mp3_path = os.path.join('shorts_bgm', background_mp3.name)
+                print("background_mp3 created")
+                with open(background_mp3_path, 'wb+') as destination:
+                    for chunk in background_mp3.chunks():
+                        destination.write(chunk)   
+
+
+            if intro_video:
+                intro_video_path = 'shorts_intro'
+                if not os.path.exists(intro_video_path):
+                    os.makedirs(intro_video_path, exist_ok=True)
+                intro_file_path = os.path.join(intro_video_path, intro_video.name)
+                with open(intro_file_path, 'wb+') as destination:
+                    for chunk in intro_video.chunks():
+                        destination.write(chunk)
+
+            if outro_video:
+                outro_video_path = 'shorts_outro'
+                if not os.path.exists(outro_video_path):
+                    os.makedirs(outro_video_path, exist_ok=True)
+                outro_file_path = os.path.join(outro_video_path, outro_video.name)
+                with open(outro_file_path, 'wb+') as destination:
+                    for chunk in outro_video.chunks():
+                        destination.write(chunk)
+
+            print("Title: ", title)
+            print("Videos Info: ", videos_info)
+            print("Voice ID: ", voice_id)
+            print("Intro Text: ", intro_text)
+            print("Outro Text: ", outro_text)
+            print("Background MP3: ", background_mp3)
+            video_creator = VideoCreator(title, videos_info, voice_id, intro_text, outro_text, background_mp3_path, intro_file_path, outro_file_path)
+            video_creator.create_video()
+            # 비디오 생성 후 리다이렉트, 성공 메시지 표시 등의 추가 작업을 여기에 구현합니다.
+            return HttpResponse("""
+            <script>
+            alert("성공적으로 생성되었습니다.");
+            window.location.href = '{}';  // Redirect to a specific URL
+            </script>
+            """.format(reverse('list_created_files')))
+        
+        else:
+            print("This is not valid form")
+            print(form.errors)
+    else:
+        form = ShortsVideoCreatorForm()
+    return render(request, 'generate_video.html', {'form': form, 'cloned_voices': cloned_voices})
+
+def list_created_files(request):
+    directories = ['shorts_bgm', 'shorts_intro', 'shorts_outro', 'shorts_output']
+    files_dict = {}
+
+    for directory in directories:
+        directory_path = os.path.join(os.getcwd(), directory)
+        files_info = []
+        if os.path.exists(directory_path):
+            for file in os.listdir(directory_path):
+                file_type = None
+                if file.lower().endswith((".mp4", ".webm")):
+                    file_type = 'video'
+                elif file.lower().endswith((".mp3", ".wav")):
+                    file_type = 'audio'
+                
+                files_info.append({
+                    'name': file,
+                    'type': file_type
+                })
+            files_dict[directory] = files_info
+        else:
+            files_dict[directory] = []
+
+    return render(request, 'list_files.html', {'files_dict': files_dict})
+
+def download_file(request, directory, filename):
+    # 파일의 전체 경로를 생성합니다.
+    file_path = os.path.join(os.getcwd(), directory, filename)
+    
+    # 파일이 실제로 존재하는지 확인합니다.
+    if os.path.exists(file_path):
+        # FileResponse를 사용하여 파일을 안전하게 제공합니다.
+        return FileResponse(open(file_path, 'rb'), as_attachment=True, filename=filename)
+    else:
+        # 파일이 존재하지 않는 경우, 404 오류를 반환합니다.
+        raise Http404("파일을 찾을 수 없습니다.")

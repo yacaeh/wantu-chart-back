@@ -1,0 +1,44 @@
+<!-- templates/list_files.html -->
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>생성된 파일 목록</title>
+  </head>
+  <body>
+    <h1>생성된 파일 목록</h1>
+    {% for directory, files_info in files_dict.items %}
+    <h2>{{ directory }}</h2>
+    <ul>
+      {% for file in files_info %}
+      <li>
+        {% if file.type == 'video' %}
+        <!-- 비디오 파일 재생 -->
+        <video controls width="250">
+          <source
+            src="{% url 'download_file' directory file.name %}"
+            type="video/mp4"
+          />
+          브라우저가 비디오 태그를 지원하지 않습니다.
+        </video>
+        {% elif file.type == 'audio' %}
+        <!-- 오디오 파일 재생 -->
+        <audio controls>
+          <source
+            src="{% url 'download_file' directory file.name %}"
+            type="audio/mpeg"
+          />
+          브라우저가 오디오 태그를 지원하지 않습니다.
+        </audio>
+        {% else %}
+        <!-- 기타 파일 다운로드 링크 -->
+        <a href="{% url 'download_file' directory file.name %}"
+          >{{ file.name }}</a
+        >
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% endfor %}
+  </body>
+</html>
