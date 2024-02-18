@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 import random
 import os
 from openai import OpenAI
-from gtts import gTTS
 from moviepy.editor import *
 import moviepy.video.fx.crop as crop_vid
 from moviepy.video.fx import resize
