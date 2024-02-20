@@ -23,7 +23,7 @@ jobs:
           REMOTE_USER: ${{ secrets.USERNAME }}
           TARGET: ${{ secrets.TARGET_DIR }}
       - name: executing remote ssh commands using password
-        uses: appleboy/ssh-action@dce9d565de8d876c11d93fa4fe677c0285a66d78
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST_DNS }}
           username: ${{ secrets.USERNAME }}
